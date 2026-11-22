@@ -1,0 +1,11 @@
+type,id,fullName,age,departmentId,departmentName,position,basicSalary,bonus,hourlyRate,hoursWorked
+FULL_TIME,101,"Hassan, Ahmed",30,1,IT,"Software Engineer, Backend",18000,2500,0,0
+PART_TIME,102,"Mohamed, Sara",24,2,Human Resources,HR Coordinator,0,0,120,80
+FULL_TIME,103,"Mahmoud, Omar",35,3,Finance,"Senior Accountant, CPA",20000,3000,0,0
+PART_TIME,104,"El-Din, Nour",22,4,Marketing,Content Creator,0,0,110,65
+FULL_TIME,105,"Ali, Youssef",29,5,Sales,"Account Executive, Enterprise",15000,4500,0,0
+FULL_TIME,106,"Ibrahim, Mona",33,6,Operations,Operations Lead,22000,2000,0,0
+PART_TIME,107,"Adel, Karim",26,7,Customer Support,Support Specialist,0,0,95,90
+FULL_TIME,108,"Tarek, Salma",38,8,Legal,"Legal Advisor, Corporate",25000,3500,0,0
+PART_TIME,109,"Mostafa, Hana",25,9,Research and Development,Research Assistant,0,0,140,70
+FULL_TIME,110,"Samir, Khaled",31,10,Quality Assurance,"QA Engineer, Automation",17000,1800,0,0
