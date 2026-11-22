@@ -1,12 +1,12 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package lab7;
 
 /**
  *
- * @author Kirolos Emad
+ * @author Lenovo
  */
 public abstract class Employee {
 
@@ -19,66 +19,51 @@ public abstract class Employee {
     public Employee(int id, String fullName, int age,
                     Department department, String position) {
 
-        setId(id);
-        setFullName(fullName);
-        setAge(age);
-        setDepartment(department);
-        setPosition(position);
+        this.id = id;
+        this.fullName = fullName;
+        this.age = age;
+        this.department = department;
+        this.position = position;
     }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        if (id <= 0) {
-            throw new IllegalArgumentException("Employee ID must be positive.");
-        }
-        this.id = id;
-    }
-
     public String getFullName() {
         return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        if (fullName == null || fullName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Employee name cannot be empty.");
-        }
-        this.fullName = fullName.trim();
     }
 
     public int getAge() {
         return age;
     }
 
-    public void setAge(int age) {
-        if (age <= 0) {
-            throw new IllegalArgumentException("Age must be greater than zero.");
-        }
-        this.age = age;
-    }
-
     public Department getDepartment() {
         return department;
-    }
-
-    public void setDepartment(Department department) {
-        if (department == null) {
-            throw new IllegalArgumentException("Department must be selected.");
-        }
-        this.department = department;
     }
 
     public String getPosition() {
         return position;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
     public void setPosition(String position) {
-        if (position == null || position.trim().isEmpty()) {
-            throw new IllegalArgumentException("Position cannot be empty.");
-        }
-        this.position = position.trim();
+        this.position = position;
     }
 
     public abstract double calculateSalary();

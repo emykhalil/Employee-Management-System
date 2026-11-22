@@ -6,8 +6,9 @@ package lab7;
 
 /**
  *
- * @author Kirolos Emad
+ * @author Lenovo
  */
+
 public class FullTimeEmployee extends Employee {
 
     private double basicSalary;
@@ -19,29 +20,24 @@ public class FullTimeEmployee extends Employee {
 
         super(id, fullName, age, department, position);
 
-        setBasicSalary(basicSalary);
-        setBonus(bonus);
+        this.basicSalary = basicSalary;
+        this.bonus = bonus;
     }
+
 
     public double getBasicSalary() {
         return basicSalary;
-    }
-
-    public void setBasicSalary(double basicSalary) {
-        if (!Double.isFinite(basicSalary) || basicSalary < 0) {
-            throw new IllegalArgumentException("Basic salary cannot be negative or invalid.");
-        }
-        this.basicSalary = basicSalary;
     }
 
     public double getBonus() {
         return bonus;
     }
 
+    public void setBasicSalary(double basicSalary) {
+        this.basicSalary = basicSalary;
+    }
+
     public void setBonus(double bonus) {
-        if (!Double.isFinite(bonus) || bonus < 0) {
-            throw new IllegalArgumentException(
-                "Bonus cannot be negative or invalid.");}
         this.bonus = bonus;
     }
 
