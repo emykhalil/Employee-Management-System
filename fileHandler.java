@@ -167,25 +167,19 @@ public class FileHandler {
         }
         return departments;
     }
-    //helper function 
+// Helper function to protect text values in CSV
     private String escapeCsv(String value) {
         if (value == null) {
-            return "";
-        }
+           return "";
+       }
 
-        boolean needsQuotes = value.contains(",")
-                || value.contains("\"")
-                || value.contains("\n")
-                || value.contains("\r");
+       // Replace any quotation mark inside the text with two quotation marks
+       String escaped = value.replace("\"", "\"\"");
 
-        String escaped = value.replace("\"", "\"\"");
-
-        if (needsQuotes) {
-            return "\"" + escaped + "\"";
-        }
-        return escaped;
+       // Always surround the text with quotation marks
+       return "\"" + escaped + "\"";
     }
-
+    
     //helper function to split csv row while keeping quoted commas intact
     private List<String> parseCsvLine(String row) {
         List<String> fields = new ArrayList<>();
