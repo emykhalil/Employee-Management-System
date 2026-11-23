@@ -179,5 +179,28 @@ public boolean addDepartment(Department d)
     fileHandler.saveDepartments(departments);
     return true;
 }
-        
+public boolean deleteDepartment(Department d)
+{
+    if (d == null)
+        return false;
+    int i, index = -1;
+    for (i = 0; i < departments.size(); i++)
+    {
+        if (departments.get(i).getDepartmentId() == d.getDepartmentId())
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1)
+        return false;
+    for (i = 0; i < employees.size(); i++)
+    {
+        if (employees.get(i).getDepartment().getDepartmentId() == d.getDepartmentId())
+            return false;
+    }
+    departments.remove(index);
+    fileHandler.saveDepartments(departments);
+    return true;
+}
         }
