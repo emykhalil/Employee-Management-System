@@ -1,28 +1,25 @@
 
 package lab7.gui;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 
-import lab7.Employee;
+import lab7.Department;
 import lab7.EmployeeManager;
-import lab7.FullTimeEmployee;
-import lab7.PartTimeEmployee;
 
-public class DeleteEmployeePanel extends JPanel {
+public class DepartmentPanel extends JPanel {
 
     // Theme colors
     private final Color BACKGROUND = Color.decode("#FFF4E5");
-    private final Color SIDEBAR = Color.decode("#1034A6");
+    private final Color BLUE = Color.decode("#1034A6");
     private final Color PURPLE = Color.decode("#A666E0");
     private final Color CARD = Color.decode("#FFFCF7");
 
     // Fonts
     private final Font TITLE_FONT =
-        new Font("Georgia", Font.BOLD, 28);
+        new Font("Georgia", Font.BOLD, 26);
 
     private final Font BODY_FONT =
         new Font("Trebuchet MS", Font.PLAIN, 14);
@@ -32,37 +29,134 @@ public class DeleteEmployeePanel extends JPanel {
 
     private EmployeeManager employeeManager;
 
-    private JTable employeeTable;
+    private JTextField idField;
+    private JTextField nameField;
+
+    private JTable departmentTable;
     private DefaultTableModel tableModel;
 
-    public DeleteEmployeePanel(EmployeeManager employeeManager) {
+    public DepartmentPanel(EmployeeManager employeeManager) {
 
         this.employeeManager = employeeManager;
 
         setLayout(new BorderLayout(15, 15));
         setBackground(BACKGROUND);
-        setBorder(new EmptyBorder(25, 25, 25, 25));
+        setBorder(new EmptyBorder(20, 25, 20, 25));
 
         // Page title
-        JLabel titleLabel = new JLabel("Delete Employee");
-        titleLabel.setFont(TITLE_FONT);
-        titleLabel.setForeground(SIDEBAR);
-        titleLabel.setHorizontalAlignment(
-            SwingConstants.CENTER
+        JLabel title = new JLabel("Department Management");
+        title.setFont(TITLE_FONT);
+        title.setForeground(BLUE);
+        title.setHorizontalAlignment(SwingConstants.CENTER);
+
+        add(title, BorderLayout.NORTH);
+
+        // Main content
+        JPanel contentPanel = new JPanel(
+            new GridLayout(2, 1, 0, 15)
         );
 
-        add(titleLabel, BorderLayout.NORTH);
+        contentPanel.setBackground(BACKGROUND);
 
-        // Table columns
+        contentPanel.add(createAddDepartmentPanel());
+        contentPanel.add(createDepartmentTablePanel());
+
+        add(contentPanel, BorderLayout.CENTER);
+
+        // Load existing departments
+        loadDepartments();
+    }
+
+    // ---------------- ADD DEPARTMENT SECTION ----------------
+
+    private JPanel createAddDepartmentPanel() {
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(CARD);
+
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(PURPLE, 2),
+            new EmptyBorder(15, 20, 15, 20)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 10, 8, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel heading = new JLabel("Add New Department");
+        heading.setFont(new Font("Georgia", Font.BOLD, 19));
+        heading.setForeground(BLUE);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+
+        panel.add(heading, gbc);
+
+        // Department ID
+        JLabel idLabel = createLabel("Department ID:");
+
+        idField = createField();
+
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.gridx = 0;
+
+        panel.add(idLabel, gbc);
+
+        gbc.gridx = 1;
+        panel.add(idField, gbc);
+
+        // Department name
+        JLabel nameLabel = createLabel("Department Name:");
+
+        nameField = createField();
+
+        gbc.gridy = 2;
+        gbc.gridx = 0;
+
+        panel.add(nameLabel, gbc);
+
+        gbc.gridx = 1;
+        panel.add(nameField, gbc);
+
+        // Add button
+        JButton addButton = createButton("Add Department");
+
+        addButton.addActionListener(e -> addDepartment());
+
+        gbc.gridy = 3;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+
+        panel.add(addButton, gbc);
+
+        return panel;
+    }
+
+    // ---------------- DEPARTMENT TABLE SECTION ----------------
+
+    private JPanel createDepartmentTablePanel() {
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(CARD);
+
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(PURPLE, 2),
+            new EmptyBorder(15, 15, 15, 15)
+        ));
+
+        JLabel heading = new JLabel("Existing Departments");
+        heading.setFont(new Font("Georgia", Font.BOLD, 19));
+        heading.setForeground(BLUE);
+
+        panel.add(heading, BorderLayout.NORTH);
+
         String[] columns = {
-            "Employee ID",
-            "Full Name",
-            "Department",
-            "Position",
-            "Employee Type"
+            "Department ID",
+            "Department Name"
         };
 
-        // Create a non-editable table
         tableModel = new DefaultTableModel(columns, 0) {
 
             @Override
@@ -71,89 +165,280 @@ public class DeleteEmployeePanel extends JPanel {
             }
         };
 
-        employeeTable = new JTable(tableModel);
+        departmentTable = new JTable(tableModel);
 
-        employeeTable.setFont(BODY_FONT);
-        employeeTable.setRowHeight(32);
-        // Allow horizontal scrolling instead of shrinking columns
-employeeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        departmentTable.setFont(BODY_FONT);
+        departmentTable.setRowHeight(30);
+        departmentTable.setBackground(CARD);
+        departmentTable.setForeground(BLUE);
 
-// Set suitable widths for each column
-    int[] columnWidths = {
-    100,  // Employee ID
-    200,  // Full Name
-    200,  // Department
-    220,  // Position
-    150   // Employee Type 
-    };
+        // Make the columns share the available table width
+        departmentTable.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
 
-    for (int i = 0; i < columnWidths.length; i++) {
-    employeeTable.getColumnModel()
-        .getColumn(i)
-        .setPreferredWidth(columnWidths[i]);
-}
-        employeeTable.setSelectionMode(
-            ListSelectionModel.SINGLE_SELECTION
+        departmentTable.getColumnModel().getColumn(0).setPreferredWidth(200);
+
+        departmentTable.getColumnModel().getColumn(1).setPreferredWidth(500);
+
+        departmentTable.getTableHeader().setFont(BUTTON_FONT);
+        departmentTable.getTableHeader().setBackground(PURPLE);
+        departmentTable.getTableHeader().setForeground(Color.WHITE);
+
+        JScrollPane scrollPane = new JScrollPane(
+            departmentTable,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
 
-        employeeTable.setBackground(CARD);
-        employeeTable.setForeground(SIDEBAR);
-
-        employeeTable.setSelectionBackground(
-            new Color(225, 205, 250)
-        );
-
-        employeeTable.setSelectionForeground(SIDEBAR);
-
-        employeeTable.getTableHeader().setFont(BUTTON_FONT);
-        employeeTable.getTableHeader().setBackground(PURPLE);
-        employeeTable.getTableHeader().setForeground(Color.WHITE);
-        employeeTable.getTableHeader().setReorderingAllowed(false);
-
-    JScrollPane scrollPane = new JScrollPane(
-        employeeTable,
-        JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
         scrollPane.setBorder(
-            BorderFactory.createLineBorder(PURPLE, 2)
+            BorderFactory.createLineBorder(PURPLE)
         );
 
-        scrollPane.getViewport().setBackground(CARD);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
-        add(scrollPane, BorderLayout.CENTER);
+        JButton refreshButton = createButton("Refresh");
 
-        // Bottom buttons
-        JPanel bottomPanel = new JPanel(
-            new FlowLayout(FlowLayout.CENTER, 20, 10)
-        );
+        refreshButton.addActionListener(e -> loadDepartments());
 
-        bottomPanel.setBackground(BACKGROUND);
+       JButton deleteButton = createButton("Delete Selected Department");
 
-        JButton deleteButton = new JButton(
-            "Delete Selected Employee"
-        );
+    deleteButton.addActionListener(e -> deleteDepartment());
 
-        styleButton(deleteButton);
+    JPanel buttonPanel = new JPanel(
+    new FlowLayout(FlowLayout.CENTER, 15, 5) );
 
-        deleteButton.addActionListener(e -> deleteEmployee());
+    buttonPanel.setBackground(CARD);
+    buttonPanel.add(refreshButton);
+    buttonPanel.add(deleteButton);
 
-        JButton refreshButton = new JButton("Refresh");
+        panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        styleButton(refreshButton);
-
-        refreshButton.addActionListener(e -> loadEmployees());
-
-        bottomPanel.add(deleteButton);
-        bottomPanel.add(refreshButton);
-
-        add(bottomPanel, BorderLayout.SOUTH);
-
-        // Load employees when page opens
-        loadEmployees();
+        return panel;
     }
 
-    // Gives buttons the project theme
-    private void styleButton(JButton button) {
+    // ---------------- ADD DEPARTMENT LOGIC ----------------
+
+    private void addDepartment() {
+
+        String idText = idField.getText().trim();
+        String name = nameField.getText().trim();
+
+        // Check empty fields
+        if (idText.isEmpty() || name.isEmpty()) {
+
+            showMessage(
+                "Please fill in all department information.",
+                JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+        try {
+
+            int id = Integer.parseInt(idText);
+
+            // Validate ID
+            if (id <= 0) {
+
+                showMessage(
+                    "Department ID must be greater than zero.",
+                    JOptionPane.WARNING_MESSAGE
+                );
+
+                return;
+            }
+
+            // Check duplicate ID
+            if (!employeeManager.isDepartmentIdUnique(id)) {
+
+                showMessage(
+                    "This department ID already exists.",
+                    JOptionPane.WARNING_MESSAGE
+                );
+
+                return;
+            }
+
+            // Check duplicate name
+            if (!employeeManager.isDepartmentNameUnique(name)) {
+
+                showMessage(
+                    "This department name already exists.",
+                    JOptionPane.WARNING_MESSAGE
+                );
+
+                return;
+            }
+
+            // Create department
+            Department department = new Department(id, name);
+
+            // Add through EmployeeManager
+            boolean success =
+                employeeManager.addDepartment(department);
+
+            if (success) {
+
+                showMessage(
+                    "Department added successfully!",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+
+                idField.setText("");
+                nameField.setText("");
+
+                loadDepartments();
+
+            } else {
+
+                showMessage(
+                    "Could not add the department.",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+
+        } catch (NumberFormatException ex) {
+
+            showMessage(
+                "Department ID must be a valid integer.",
+                JOptionPane.WARNING_MESSAGE
+            );
+        }
+    }
+
+// ---------------- DELETE DEPARTMENT LOGIC ----------------
+
+private void deleteDepartment() {
+
+    // Check whether a row is selected
+    int selectedRow = departmentTable.getSelectedRow();
+
+    if (selectedRow == -1) {
+
+        showMessage(
+            "Please select a department to delete.",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        return;
+    }
+
+    // Get the department ID from the selected row
+    int departmentId = (int) tableModel.getValueAt(
+        selectedRow, 0
+    );
+
+    // Find the selected department
+    Department selectedDepartment = null;
+
+    List<Department> departments =
+        employeeManager.getAllDepartments();
+
+    for (Department department : departments) {
+
+        if (department.getDepartmentId() == departmentId) {
+            selectedDepartment = department;
+            break;
+        }
+    }
+
+    if (selectedDepartment == null) {
+
+        showMessage(
+            "Department not found.",
+            JOptionPane.ERROR_MESSAGE
+        );
+
+        loadDepartments();
+        return;
+    }
+
+    // Ask for confirmation
+    int choice = JOptionPane.showConfirmDialog(
+        this,
+        "Are you sure you want to delete "
+            + selectedDepartment.getDepartmentName() + "?",
+        "Confirm Department Deletion",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.WARNING_MESSAGE
+    );
+
+    if (choice != JOptionPane.YES_OPTION) {
+        return;
+    }
+
+    // Attempt deletion through EmployeeManager
+    boolean success =
+        employeeManager.deleteDepartment(selectedDepartment);
+
+    if (success) {
+
+        showMessage(
+            "Department deleted successfully!",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+
+        loadDepartments();
+
+    } else {
+
+        showMessage(
+            "This department cannot be deleted because "
+                + "employees are assigned to it.",
+            JOptionPane.WARNING_MESSAGE
+        );
+    }
+}
+
+    // ---------------- LOAD DEPARTMENTS ----------------
+
+    private void loadDepartments() {
+
+        tableModel.setRowCount(0);
+
+        List<Department> departments =
+            employeeManager.getAllDepartments();
+
+        for (Department department : departments) {
+
+            Object[] row = {
+                department.getDepartmentId(),
+                department.getDepartmentName()
+            };
+
+            tableModel.addRow(row);
+        }
+    }
+
+    // ---------------- HELPER METHODS ----------------
+
+    private JLabel createLabel(String text) {
+
+        JLabel label = new JLabel(text);
+        label.setFont(BODY_FONT);
+        label.setForeground(BLUE);
+
+        return label;
+    }
+
+    private JTextField createField() {
+
+        JTextField field = new JTextField(18);
+        field.setFont(BODY_FONT);
+
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(
+                new Color(216, 196, 240)
+            ),
+            new EmptyBorder(5, 7, 5, 7)
+        ));
+
+        return field;
+    }
+
+    private JButton createButton(String text) {
+
+        JButton button = new JButton(text);
 
         button.setFont(BUTTON_FONT);
         button.setForeground(Color.WHITE);
@@ -161,107 +446,21 @@ employeeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setOpaque(true);
+
         button.setCursor(
             new Cursor(Cursor.HAND_CURSOR)
         );
+
+        return button;
     }
 
-    // Loads all employees into the table
-    public void loadEmployees() {
+    private void showMessage(String message, int messageType) {
 
-        tableModel.setRowCount(0);
-
-        List<Employee> employees =
-            employeeManager.getAllEmployees();
-
-        for (Employee employee : employees) {
-
-            String employeeType;
-
-            if (employee instanceof FullTimeEmployee) {
-                employeeType = "Full-Time";
-            }
-            else if (employee instanceof PartTimeEmployee) {
-                employeeType = "Part-Time";
-            }
-            else {
-                employeeType = "Unknown";
-            }
-
-            Object[] row = {
-                employee.getId(),
-                employee.getFullName(),
-                employee.getDepartment().getDepartmentName(),
-                employee.getPosition(),
-                employeeType
-            };
-
-            tableModel.addRow(row);
-        }
-    }
-
-    // Deletes the selected employee
-    private void deleteEmployee() {
-
-        int selectedRow = employeeTable.getSelectedRow();
-
-        // Check whether an employee was selected
-        if (selectedRow == -1) {
-
-            JOptionPane.showMessageDialog(
-                this,
-                "Please select an employee first.",
-                "No Employee Selected",
-                JOptionPane.WARNING_MESSAGE
-            );
-
-            return;
-        }
-
-        // Get the selected employee ID
-        int employeeId = Integer.parseInt(
-            tableModel.getValueAt(selectedRow, 0).toString()
-        );
-
-        String employeeName =
-            tableModel.getValueAt(selectedRow, 1).toString();
-
-        // Ask for confirmation
-        int choice = JOptionPane.showConfirmDialog(
+        JOptionPane.showMessageDialog(
             this,
-            "Are you sure you want to delete "
-                + employeeName + "?",
-            "Confirm Deletion",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE
+            message,
+            "Department Management",
+            messageType
         );
-
-        if (choice == JOptionPane.YES_OPTION) {
-
-            // Delete through EmployeeManager
-            boolean deleted =
-                employeeManager.deleteEmployee(employeeId);
-
-            if (deleted) {
-
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Employee deleted successfully!",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE
-                );
-
-                loadEmployees();
-
-            } else {
-
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Employee could not be deleted.",
-                    "Deletion Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-            }
-        }
     }
-} 
+}
