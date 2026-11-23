@@ -172,15 +172,12 @@ public class DepartmentPanel extends JPanel {
         departmentTable.setBackground(CARD);
         departmentTable.setForeground(BLUE);
 
-        departmentTable.setAutoResizeMode(
-            JTable.AUTO_RESIZE_OFF
-        );
+        // Make the columns share the available table width
+        departmentTable.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
 
-        departmentTable.getColumnModel()
-            .getColumn(0).setPreferredWidth(150);
+        departmentTable.getColumnModel().getColumn(0).setPreferredWidth(200);
 
-        departmentTable.getColumnModel()
-            .getColumn(1).setPreferredWidth(300);
+        departmentTable.getColumnModel().getColumn(1).setPreferredWidth(500);
 
         departmentTable.getTableHeader().setFont(BUTTON_FONT);
         departmentTable.getTableHeader().setBackground(PURPLE);
@@ -202,12 +199,16 @@ public class DepartmentPanel extends JPanel {
 
         refreshButton.addActionListener(e -> loadDepartments());
 
-        JPanel buttonPanel = new JPanel(
-            new FlowLayout(FlowLayout.CENTER)
-        );
+       JButton deleteButton = createButton("Delete Selected Department");
 
-        buttonPanel.setBackground(CARD);
-        buttonPanel.add(refreshButton);
+    deleteButton.addActionListener(e -> deleteDepartment());
+
+    JPanel buttonPanel = new JPanel(
+    new FlowLayout(FlowLayout.CENTER, 15, 5) );
+
+    buttonPanel.setBackground(CARD);
+    buttonPanel.add(refreshButton);
+    buttonPanel.add(deleteButton);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -304,6 +305,90 @@ public class DepartmentPanel extends JPanel {
             );
         }
     }
+
+// ---------------- DELETE DEPARTMENT LOGIC ----------------
+
+private void deleteDepartment() {
+
+    // Check whether a row is selected
+    int selectedRow = departmentTable.getSelectedRow();
+
+    if (selectedRow == -1) {
+
+        showMessage(
+            "Please select a department to delete.",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        return;
+    }
+
+    // Get the department ID from the selected row
+    int departmentId = (int) tableModel.getValueAt(
+        selectedRow, 0
+    );
+
+    // Find the selected department
+    Department selectedDepartment = null;
+
+    List<Department> departments =
+        employeeManager.getAllDepartments();
+
+    for (Department department : departments) {
+
+        if (department.getDepartmentId() == departmentId) {
+            selectedDepartment = department;
+            break;
+        }
+    }
+
+    if (selectedDepartment == null) {
+
+        showMessage(
+            "Department not found.",
+            JOptionPane.ERROR_MESSAGE
+        );
+
+        loadDepartments();
+        return;
+    }
+
+    // Ask for confirmation
+    int choice = JOptionPane.showConfirmDialog(
+        this,
+        "Are you sure you want to delete "
+            + selectedDepartment.getDepartmentName() + "?",
+        "Confirm Department Deletion",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.WARNING_MESSAGE
+    );
+
+    if (choice != JOptionPane.YES_OPTION) {
+        return;
+    }
+
+    // Attempt deletion through EmployeeManager
+    boolean success =
+        employeeManager.deleteDepartment(selectedDepartment);
+
+    if (success) {
+
+        showMessage(
+            "Department deleted successfully!",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+
+        loadDepartments();
+
+    } else {
+
+        showMessage(
+            "This department cannot be deleted because "
+                + "employees are assigned to it.",
+            JOptionPane.WARNING_MESSAGE
+        );
+    }
+}
 
     // ---------------- LOAD DEPARTMENTS ----------------
 
